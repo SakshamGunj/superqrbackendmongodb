@@ -1,0 +1,20 @@
+{
+    "conditions": [
+        {
+            "type": "spin_points",
+            "threshold": 30,
+            "title": "Points Milestone!",
+            "message": "Congrats! You've reached {points} spin points!",
+            "tag": "points-30"
+        },
+        {
+            "type": "spin_points",
+            "threshold": 100,
+            "title": "Spin Master!",
+            "message": "Wow! {points} spin points collected!",
+            "tag": "points-100"
+        }
+        
+    ],
+    "alreadyShownTags": [] 
+}

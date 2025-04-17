@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Win Loyalty</title>
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Favicon Links -->
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <!-- Optional: Add theme color for browser UI -->
+    <meta name="theme-color" content="#120c1e"> <!-- Default Dark Theme Background -->
+</head>
+<body>
+    <!-- Main Application Container -->
+    <div id="app-container">
+
+        <!-- Header Section -->
+        <header id="app-header">
+            <!-- Back Button (dynamically shown/hidden) -->
+            <button id="back-button" class="header-button hidden" aria-label="Go back">
+                <!-- SVG Icon for Back Arrow -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+
+            <!-- Dynamic Title -->
+            <h1 id="header-title">Spin & Win</h1>
+
+            <!-- Authentication / User Section -->
+            <div id="header-auth-section">
+                 <!-- Login/Signup Link (shown when logged out) -->
+                 <a id="header-login-link" href="#/auth" class="button button-secondary button-small hidden">Login / Sign Up</a>
+                 <!-- User Info & Actions (shown when logged in) -->
+                 <div id="header-user-section" class="header-user-info hidden">
+                     <span id="header-user-name" aria-label="Current User">User</span>
+                     <!-- Dashboard Link (User Icon) -->
+                     <a id="dashboard-link" href="#/dashboard" class="header-button" aria-label="View Dashboard">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                     </a>
+                     <!-- Logout Button -->
+                     <button id="header-logout-button" class="button button-secondary button-small logout-button" aria-label="Logout">Logout</button>
+                 </div>
+            </div>
+            <!-- Placeholder for alignment if auth section is hidden -->
+            <div id="header-placeholder-right" class="header-placeholder hidden"></div>
+        </header>
+
+        <!-- Main Content Area for Pages -->
+        <main id="main-content">
+
+            <!-- Global Loading Indicator Page -->
+            <div id="page-loading" class="page loading-visible">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Landing Page (Enhanced Dark Theme) -->
+            <div id="page-landing" class="page landing-page dark-theme">
+                 <div class="landing-background-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                 </div>
+                 <div class="content-wrapper center-text landing-content">
+                    <!-- Default Gift Box Icon - Can be changed by JS -->
+                    <img id="landing-restaurant-logo" src="/assets/icons/gift-box.png" alt="Welcome" class="landing-logo">
+                    <h2 id="landing-restaurant-name" class="landing-title">Restaurant Name</h2>
+                    <p id="landing-restaurant-description" class="landing-description">Tap below and spin the wheel for exclusive rewards!</p>
+                    <button id="landing-spin-button" class="button button-primary button-large button-glow pulse">Spin Now!</button>
+                </div>
+            </div>
+
+            <!-- Spin Page (Enhanced Dark Theme) -->
+            <div id="page-spin" class="page spin-page dark-theme">
+                 <div class="content-wrapper spin-page-content">
+                    <!-- Info Bar Moved Up -->
+                    <div class="spin-info-header">
+                        <span id="spin-remaining-spins" class="spin-info hidden">Spins Left: 3</span>
+                        <!-- Optional: Add Restaurant Title Here if needed -->
+                        <!-- <h2 class="spin-page-restaurant-title">Restaurant Name</h2> -->
+                    </div>
+
+                    <div id="spin-message-display" class="message-display hidden"></div>
+
+                    <!-- Spin Wheel Container (Revised) -->
+                    <div id="spin-wheel-outer-container">
+                         <div class="wheel-pointer"></div> <!-- Static Pointer Element (CSS styled) -->
+                         <div class="wheel-center-highlight"></div> <!-- Inner glow/highlight -->
+                         <div class="wheel-glow-container"> <!-- Container for background glow -->
+                            <div id="spin-wheel-container"> <!-- Container for canvas, ensures aspect ratio -->
+                                <canvas id="wheelCanvas" width="800" height="800"></canvas>
+                                <!-- Center button removed from canvas overlay -->
+                            </div>
+                         </div>
+                    </div>
+
+                    <!-- Spin Action Button (Moved Below Wheel) -->
+                    <div class="spin-action-area">
+                         <button id="spin-action-button" class="button button-primary button-large button-glow">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rotate-cw"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                             <span>Spin Now</span>
+                         </button>
+                    </div>
+
+                    <!-- Current Offers Section (Revised) -->
+                    <section id="spin-offers-section" class="spin-offers-section hidden">
+                        <h4>Possible Prizes</h4>
+                        <div id="spin-offers-container" class="spin-offers-grid">
+                            <!-- Offer cards injected by ui.js -->
+                        </div>
+                    </section>
+                 </div>
+            </div>
+
+            <!-- Authentication Page -->
+            <div id="page-auth" class="page">
+                 <div class="content-wrapper auth-page-content">
+                    <!-- Optional: Info shown if navigating here to claim a reward -->
+                    <div id="auth-claim-info" class="reward-info hidden">
+                        <p>Please login or sign up to claim:</p>
+                        <h3 id="auth-claim-description">Reward Description</h3>
+                    </div>
+
+                    <!-- Auth Tabs -->
+                    <div id="auth-tabs" class="auth-tabs-container">
+                         <button id="auth-login-tab" class="auth-tab active" data-tab-target="auth-login-form">Login</button>
+                         <button id="auth-signup-tab" class="auth-tab" data-tab-target="auth-signup-form">Sign Up</button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="auth-login-form" class="auth-form">
+                        <h3>Welcome Back!</h3>
+                        <div id="auth-login-message" class="message-display hidden"></div>
+                         <div class="form-group">
+                             <label for="auth-email-login">Email</label>
+                             <input type="email" id="auth-email-login" required autocomplete="username">
+                         </div>
+                         <div class="form-group">
+                             <label for="auth-password-login">Password</label>
+                             <input type="password" id="auth-password-login" required autocomplete="current-password">
+                         </div>
+                         <button type="submit" id="auth-login-button" class="button button-primary button-fullWidth">Login</button>
+                    </form>
+
+                    <!-- Sign Up Form -->
+                     <form id="auth-signup-form" class="auth-form hidden">
+                        <h3>Create Your Account</h3>
+                        <div id="auth-signup-message" class="message-display hidden"></div>
+                         <div class="form-group">
+                             <label for="auth-name-signup">Your Name</label>
+                             <input type="text" id="auth-name-signup" required autocomplete="name">
+                         </div>
+                         <div class="form-group">
+                             <label for="auth-whatsapp-signup">WhatsApp Number</label>
+                             <input type="tel" id="auth-whatsapp-signup" required autocomplete="tel" placeholder="e.g., 9876543210">
+                         </div>
+                          <div class="form-group">
+                             <label for="auth-email-signup">Email</label>
+                             <input type="email" id="auth-email-signup" required autocomplete="email">
+                         </div>
+                         <div class="form-group">
+                             <label for="auth-password-signup">Password (min. 6 characters)</label>
+                             <input type="password" id="auth-password-signup" required minlength="6" autocomplete="new-password">
+                         </div>
+                         <button type="submit" id="auth-signup-button" class="button button-primary button-fullWidth">Sign Up & Claim (if applicable)</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Coupon Display Page -->
+            <div id="page-coupon-display" class="page">
+                 <div class="content-wrapper">
+                     <h2 class="coupon-title">🎁 Your Coupon Code 🎁</h2>
+                     <div id="coupon-bonus-message" class="message-display success-message hidden"></div>
+                     <div class="coupon-card">
+                         <p id="coupon-description">Reward Description</p>
+                         <div class="code-container">
+                            <span class="code-label">Your Code:</span>
+                            <p id="coupon-code" class="code">CODE-123</p>
+                         </div>
+                         <p id="coupon-validity" class="validity">Show code to redeem.</p>
+                     </div>
+                     <div class="page-actions">
+                        <button id="coupon-view-rewards-button" class="button button-secondary button-fullWidth">View Dashboard</button>
+                        <button id="coupon-spin-again-button" class="button button-primary button-fullWidth">Spin Again!</button>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Dashboard Page -->
+            <div id="page-dashboard" class="page">
+                 <div class="content-wrapper dashboard-content">
+                     <!-- Profile Section -->
+                     <section id="dashboard-profile" class="profile-section card-style hidden">
+                         <h3 id="dashboard-welcome">Welcome!</h3>
+                         <div class="profile-details">
+                             <p>Email: <span id="dashboard-email"></span></p>
+                             <p>WhatsApp: <span id="dashboard-phone"></span></p>
+                         </div>
+                         <div class="profile-actions">
+                            <button id="dashboard-edit-profile-button" class="button button-secondary button-small">Edit Profile</button>
+                         </div>
+                     </section>
+
+                     <!-- Overall Summary -->
+                     <section id="dashboard-summary" class="dashboard-summary-section card-style hidden">
+                         <!-- Calculated Total Points / Tier / Punches injected by ui.js -->
+                     </section>
+
+                     <!-- Global Spin Points Timeline Section -->
+                      <section id="dashboard-global-timeline" class="dashboard-global-timeline-section card-style hidden">
+                          <h3>Your Spin Journey <span class="timeline-subtitle">(Overall Progress)</span></h3>
+                          <div class="timeline-container">
+                              <!-- Timeline generated by ui.js -->
+                          </div>
+                     </section>
+
+                     <!-- Restaurant Section Header -->
+                     <h3 id="dashboard-restaurant-header" class="section-header hidden">Your Restaurant Activity</h3>
+
+                     <!-- Tabs -->
+                     <div id="dashboard-tabs" class="dashboard-tabs-container hidden">
+                         <!-- Tab buttons injected by ui.js -->
+                     </div>
+
+                     <!-- Tab Content Container -->
+                     <div id="dashboard-tab-content" class="dashboard-tab-content-container">
+                         <!-- Content panes injected by ui.js -->
+                         <!-- Message for loading/error/no data -->
+                         <p id="dashboard-no-data" class="hidden info-message text-center">Loading dashboard data...</p>
+                         <!-- Optional: Add a spinner specifically for dashboard content updates -->
+                         <!-- <div id="dashboard-content-loader" class="spinner-small hidden"></div> -->
+                     </div>
+                 </div>
+            </div>
+
+             <!-- Not Found Page -->
+             <div id="page-not-found" class="page">
+                 <div class="content-wrapper center-text">
+                     <h1>404</h1>
+                     <h2>Oops! Page Not Found.</h2>
+                     <p>Sorry, the page you are looking for doesn't exist or the restaurant is not available.</p>
+                     <a href="#/" class="button button-primary">Go Back Home</a> <!-- Link to base -->
+                 </div>
+             </div>
+
+        </main>
+
+        <!-- Modals Container -->
+        <div id="modal-overlay" class="modal-overlay hidden">
+
+            <!-- Reward Won Modal -->
+            <div id="modal-reward-won" class="modal hidden">
+                <h2 class="modal-header">🎉 Congratulations! 🎉</h2>
+                <div class="modal-body">
+                    <p>You won:</p>
+                    <p id="modal-reward-description" class="modal-reward-won-text">Reward Description</p>
+                </div>
+                <div class="modal-actions">
+                    <button id="modal-claim-button" class="button button-primary">Claim Reward</button>
+                    <button id="modal-spin-again-button" class="button button-secondary modal-close-button" data-modal-id="modal-reward-won">Spin Again</button>
+                </div>
+                <button class="modal-close-button" aria-label="Close modal" data-modal-id="modal-reward-won">×</button>
+            </div>
+
+            <!-- Edit Profile Modal -->
+            <div id="modal-edit-profile" class="modal hidden">
+                <h2 class="modal-header">Edit Profile</h2>
+                <form id="edit-profile-form">
+                     <div id="edit-profile-message" class="message-display error-message hidden"></div>
+                     <div class="form-group">
+                         <label for="edit-name">Your Name</label>
+                         <input type="text" id="edit-name" required autocomplete="name">
+                     </div>
+                     <div class="form-group">
+                         <label for="edit-phone">WhatsApp Number</label>
+                          <input type="tel" id="edit-phone" required autocomplete="tel">
+                     </div>
+                     <div class="modal-actions">
+                         <button type="submit" class="button button-primary">Save Changes</button>
+                         <button type="button" class="button button-secondary modal-close-button" data-modal-id="modal-edit-profile">Cancel</button>
+                     </div>
+                </form>
+                 <button class="modal-close-button" aria-label="Close modal" data-modal-id="modal-edit-profile">×</button>
+            </div>
+
+             <!-- Simple Message Modal -->
+             <div id="modal-message" class="modal hidden">
+                 <h2 id="modal-message-title" class="modal-header">Message</h2>
+                 <div class="modal-body">
+                     <p id="modal-message-text"></p>
+                 </div>
+                 <div class="modal-actions">
+                      <button type="button" class="button button-primary modal-close-button" data-modal-id="modal-message">OK</button>
+                 </div>
+                  <button class="modal-close-button" aria-label="Close modal" data-modal-id="modal-message">×</button>
+             </div>
+
+        </div><!-- /#modal-overlay -->
+
+    </div><!-- /#app-container -->
+
+    <!-- Firebase SDK Scripts (Ensure these are correct for your project) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+    <!-- Your main app script -->
+    <script type="module" src="js/app.js" defer></script>
+</body>
+</html>

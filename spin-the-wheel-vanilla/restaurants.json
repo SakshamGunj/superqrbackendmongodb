@@ -1,0 +1,152 @@
+[
+    {
+      "id": "healthy-bowl",
+      "name": "Healthy Bowl Delight",
+      "description": "Fresh ingredients, vibrant flavors. Spin for a healthy treat!",
+      "spinOffers": [
+        { "id": "hb1", "label": "10% Off Order", "value": "10_PERCENT_OFF", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb2", "label": "Free Smoothie", "value": "FREE_SMOOTHIE", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb3", "label": "Try Again", "value": "TRY_AGAIN", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb4", "label": "$5 Off $20+", "value": "5_DOLLAR_OFF", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb5", "label": "Free Topping", "value": "FREE_TOPPING", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb6", "label": "Try Again", "value": "TRY_AGAIN", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb7", "label": "15% Off Next", "value": "15_PERCENT_OFF_NEXT", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb8", "label": "Spin Again!", "value": "TRY_AGAIN", "color": "#E0E0E0", "textColor": "#616161" }
+      ],
+      "loyalty": {
+        "rewardThreshold": 5,
+        "thresholdRewardLabel": "Loyalty Bonus: Free Bowl!",
+        "thresholdRewardValue": "FREE_BOWL_LOYALTY"
+      },
+      "theme": {
+        "primary": "#E91E63",
+        "secondary": "#FF9800",
+        "accent": "#FFEB3B"
+      }
+    },
+    {
+      "id": "pizza-palace",
+      "name": "Pizza Palace Supreme",
+      "description": "Authentic Italian pizza. Spin the wheel for a slice of heaven!",
+      "spinOffers": [
+        { "id": "pp1", "label": "Free Garlic Knots", "value": "FREE_KNOTS", "color": "#FF7043", "textColor": "#FFFFFF" },
+        { "id": "pp2", "label": "10% Off Pizza", "value": "10_PERCENT_OFF", "color": "#FFF176", "textColor": "#333333" },
+        { "id": "pp3", "label": "Try Again :(", "value": "TRY_AGAIN", "color": "#BDBDBD", "textColor": "#424242" },
+        { "id": "pp4", "label": "$2 Off Slice", "value": "2_OFF_SLICE", "color": "#FF7043", "textColor": "#FFFFFF" },
+        { "id": "pp5", "label": "Free Drink", "value": "FREE_DRINK", "color": "#FFF176", "textColor": "#333333" },
+        { "id": "pp6", "label": "Better Luck Next Time!", "value": "TRY_AGAIN", "color": "#BDBDBD", "textColor": "#424242" }
+      ],
+      "loyalty": {
+        "rewardThreshold": 7,
+        "thresholdRewardLabel": "Loyalty Bonus: 20% Off Order!",
+        "thresholdRewardValue": "20_PERCENT_OFF_LOYALTY"
+      },
+      "theme": {
+        "primary": "#D32F2F",
+        "secondary": "#FFA000",
+        "accent": "#FFEB3B"
+      }
+    },
+    {
+      "id": "rest_6cca71c9",
+      "name": "Final Restaurant",
+      "description": "Fresh ingredients, vibrant flavors. Spin for a healthy treat!",
+      "spinOffers": [
+        { "id": "hb1", "label": "40% Off", "value": "40% Off", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb2", "label": "40% Off", "value": "40% Off", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb3", "label": "40% Off", "value": "40% Off", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb4", "label": "40% Off", "value": "40% Off", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb5", "label": "40% Off", "value": "40% Off", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb6", "label": "40% Off", "value": "40% Off", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb7", "label": "40% Off", "value": "40% Off", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb8", "label": "40% Off", "value": "40% Off", "color": "#E0E0E0", "textColor": "#616161" }
+      ],
+      "loyalty": {
+        "rewardThreshold": 5,
+        "thresholdRewardLabel": "Loyalty Bonus: Free Bowl!",
+        "thresholdRewardValue": "FREE_BOWL_LOYALTY"
+      },
+      "theme": {
+        "primary": "#E91E63",
+        "secondary": "#FF9800",
+        "accent": "#FFEB3B"
+      }
+    },
+    {
+      "id": "rest_b194e52d",
+      "name": "Deploy Setting",
+      "description": "Fresh ingredients, vibrant flavors. Spin for a healthy treat!",
+      "spinOffers": [
+        { "id": "hb1", "label": "Free Food", "value": "Free Food", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb2", "label": "Free Food", "value": "Free Food", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb3", "label": "Free Food", "value": "Free Food", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb4", "label": "Free Food", "value": "Free Food", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb5", "label": "Free Food", "value": "Free Food", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb6", "label": "Free Food", "value": "Free Food", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb7", "label": "Free Food", "value": "Free Food", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb8", "label": "Free Food", "value": "Free Food", "color": "#E0E0E0", "textColor": "#616161" }
+      ],
+      "loyalty": {
+        "rewardThreshold": 5,
+        "thresholdRewardLabel": "Loyalty Bonus: Free Bowl!",
+        "thresholdRewardValue": "FREE_BOWL_LOYALTY"
+      },
+      "theme": {
+        "primary": "#E91E63",
+        "secondary": "#FF9800",
+        "accent": "#FFEB3B"
+      }
+    },
+    {
+      "id": "rest_feed4c18",
+      "name": "Deploy Setting 2",
+      "description": "Fresh ingredients, vibrant flavors. Spin for a healthy treat!",
+      "spinOffers": [
+        { "id": "hb1", "label": "Free Drink", "value": "Free Drink", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb2", "label": "Free Drink", "value": "Free Drink", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb3", "label": "Free Drink", "value": "Free Drink", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb4", "label": "Free Drink", "value": "Free Drink", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb5", "label": "Free Drink", "value": "Free Drink", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb6", "label": "Free Drink", "value": "Free Drink", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb7", "label": "Free Drink", "value": "Free Drink", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb8", "label": "Free Drink", "value": "Free Drink", "color": "#E0E0E0", "textColor": "#616161" }
+      ],
+      "loyalty": {
+        "rewardThreshold": 5,
+        "thresholdRewardLabel": "Loyalty Bonus: Free Bowl!",
+        "thresholdRewardValue": "FREE_BOWL_LOYALTY"
+      },
+      "theme": {
+        "primary": "#E91E63",
+        "secondary": "#FF9800",
+        "accent": "#FFEB3B"
+      }
+    },
+    {
+      "id": "rest_8744cc17",
+      "name": "Deploy Setting 3",
+      "description": "Fresh ingredients, vibrant flavors. Spin for a healthy treat!",
+      "spinOffers": [
+        { "id": "hb1", "label": "Free Drink", "value": "Free Drink", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb2", "label": "Free Drink", "value": "Free Drink", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb3", "label": "Free Drink", "value": "Free Drink", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb4", "label": "Free Drink", "value": "Free Drink", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb5", "label": "Free Drink", "value": "Free Drink", "color": "#FFCC80", "textColor": "#333333" },
+        { "id": "hb6", "label": "Free Drink", "value": "Free Drink", "color": "#E0E0E0", "textColor": "#616161" },
+        { "id": "hb7", "label": "Free Drink", "value": "Free Drink", "color": "#AED581", "textColor": "#333333" },
+        { "id": "hb8", "label": "Free Drink", "value": "Free Drink", "color": "#E0E0E0", "textColor": "#616161" }
+      ],
+      "loyalty": {
+        "rewardThreshold": 5,
+        "thresholdRewardLabel": "Loyalty Bonus: Free Bowl!",
+        "thresholdRewardValue": "FREE_BOWL_LOYALTY"
+      },
+      "theme": {
+        "primary": "#E91E63",
+        "secondary": "#FF9800",
+        "accent": "#FFEB3B"
+      }
+    }
+
+
+  ]
