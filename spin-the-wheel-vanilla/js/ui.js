@@ -3,12 +3,12 @@
 // --- Imports ---
 import { getState, getRemainingSpins, updateUserProfileState } from './state.js';
 // Config import might only be needed for theme fallback if API fails
-// import { fetchRestaurantConfigById } from './config.js'; // Not strictly needed if API provides names/themes
+// import { fetchRestaurantConfigById } from './config.js';
 import { formatDate } from './utils.js';
 import { getCurrentFirebaseUser, signOutUser } from './auth.js';
 
-// --- Define Global Spin Point Milestones ---
-// Used for the overall progress timeline on the dashboard
+
+// --- Define Global Spin Point Milestones (Optional - Not Used in Current Dashboard Render) ---
 const GLOBAL_SPIN_MILESTONES = [
     { points: 50, reward: "Bonus Sparkle", icon: "✨" },
     { points: 150, reward: "Coffee Treat", icon: "☕" },
@@ -18,7 +18,8 @@ const GLOBAL_SPIN_MILESTONES = [
     { points: 2000, reward: "VIP Status", icon: "⭐" },
 ];
 
-// --- Element Getters (Ensure IDs match index.html) ---
+
+// --- Element Getters Cache (Ensure IDs match index.html) ---
 export const elements = {
     // App Container
     appContainer: document.getElementById('app-container'),
@@ -49,10 +50,12 @@ export const elements = {
     landingRestaurantLogo: document.getElementById('landing-restaurant-logo'),
     // Spin Page Elements
     spinMessageDisplay: document.getElementById('spin-message-display'),
-    spinButtonElement: document.getElementById('spin-action-button'), // *** UPDATED: Use the external button ID ***
+    spinButtonElement: document.getElementById('spin-action-button'), // External spin button
     spinPageRemainingSpins: document.getElementById('spin-remaining-spins'),
-    spinOffersSection: document.getElementById('spin-offers-section'),
-    spinOffersContainer: document.getElementById('spin-offers-container'),
+    spinRewardsPreview: document.getElementById('spin-rewards-preview'),
+    spinRewardsPreviewContainer: document.getElementById('spin-rewards-preview-container'),
+    // Slot Machine Elements
+    slotReel1: document.getElementById('reel1'),
     // Auth Page Elements
     authTabs: document.getElementById('auth-tabs'),
     authLoginTab: document.getElementById('auth-login-tab'),
@@ -85,7 +88,7 @@ export const elements = {
     dashboardPhone: document.getElementById('dashboard-phone'),
     dashboardEditProfileButton: document.getElementById('dashboard-edit-profile-button'),
     dashboardSummary: document.getElementById('dashboard-summary'),
-    dashboardGlobalTimeline: document.getElementById('dashboard-global-timeline'),
+    dashboardGlobalTimeline: document.getElementById('dashboard-global-timeline'), // Keep if using global timeline
     dashboardTabsContainer: document.getElementById('dashboard-tabs'),
     dashboardTabContentContainer: document.getElementById('dashboard-tab-content'),
     dashboardNoData: document.getElementById('dashboard-no-data'),
@@ -99,7 +102,7 @@ export const elements = {
     editProfileForm: document.getElementById('edit-profile-form'),
     editProfileMessage: document.getElementById('edit-profile-message'),
     editNameInput: document.getElementById('edit-name'),
-    editPhoneInput: document.getElementById('edit-phone'), // Used for WhatsApp
+    editPhoneInput: document.getElementById('edit-phone'),
     modalMessage: document.getElementById('modal-message'),
     modalMessageTitle: document.getElementById('modal-message-title'),
     modalMessageText: document.getElementById('modal-message-text'),
@@ -110,60 +113,47 @@ export const elements = {
 export function showPage(pageId) {
     console.log(`UI: Attempting to show page: ${pageId}`);
     const mainContent = elements.mainContent;
-    if (!mainContent) {
-        console.error("UI: Main content container not found!");
-        return;
-    }
+    if (!mainContent) { console.error("UI: Main content container not found!"); return; }
 
     elements.pageLoading?.classList.remove('loading-visible');
     let foundPage = false;
 
-    // Hide all pages except the loading overlay initially
     const pages = mainContent.querySelectorAll(':scope > .page');
-    pages.forEach(page => {
-        if (page.id !== 'page-loading') {
-            page.classList.remove('active');
-        }
-    });
+    pages.forEach(page => { if (page.id !== 'page-loading') page.classList.remove('active'); });
 
-    // Show the target page
     const targetPage = document.getElementById(pageId);
     if (targetPage) {
-        // Special handling for dark theme pages to adjust header style
+        elements.header?.classList.remove('on-dark'); // Reset header style
+        document.body.classList.remove('dark-theme-explicit'); // Reset body theme
+
         if (targetPage.classList.contains('dark-theme')) {
             elements.header?.classList.add('on-dark');
-        } else {
-            elements.header?.classList.remove('on-dark');
+            document.body.classList.add('dark-theme-explicit');
         }
 
-        if (pageId === 'page-loading') {
-            elements.pageLoading?.classList.add('loading-visible');
-            console.log(`UI: Activated loading page.`);
-        } else {
-            targetPage.classList.add('active');
-            console.log(`UI: Activated content page: ${pageId}`);
-            mainContent.scrollTop = 0; // Scroll to top
-        }
+        if (pageId === 'page-loading') { elements.pageLoading?.classList.add('loading-visible'); console.log(`UI: Activated loading page.`); }
+        else { targetPage.classList.add('active'); console.log(`UI: Activated content page: ${pageId}`); mainContent.scrollTop = 0; }
         foundPage = true;
     } else {
         console.warn(`UI: Page with ID ${pageId} not found. Showing 404.`);
-        elements.pageNotFound?.classList.add('active'); // Fallback
-        elements.header?.classList.remove('on-dark'); // Ensure header is not transparent on 404
+        elements.pageNotFound?.classList.add('active');
+        elements.header?.classList.remove('on-dark');
+        document.body.classList.remove('dark-theme-explicit');
     }
-    // Update header AFTER page visibility and theme class are set
     updateHeaderUI();
 }
 
 // --- Theming ---
 export function applyTheme(theme) {
     const root = document.documentElement;
-    const defaultTheme = { primary: '#E53988', secondary: '#ffc107', accent: '#00bcd4', primaryRgb: '229, 57, 136', secondaryRgb: '255, 193, 7', accentRgb: '0, 188, 212'};
+    const defaultTheme = { primary: '#8a2be2', secondary: '#ff69b4', accent: '#f1c40f', primaryRgb: '138, 43, 226', secondaryRgb: '255, 105, 180', accentRgb: '241, 196, 15'};
     const currentTheme = (theme && typeof theme === 'object' && theme.primary) ? theme : defaultTheme;
     const safeTheme = { ...defaultTheme, ...currentTheme };
 
-    safeTheme.primaryRgb = safeTheme.primaryRgb || defaultTheme.primaryRgb;
-    safeTheme.secondaryRgb = safeTheme.secondaryRgb || defaultTheme.secondaryRgb;
-    safeTheme.accentRgb = safeTheme.accentRgb || defaultTheme.accentRgb;
+    const hexToRgb = (hex) => { let r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return r ? `${parseInt(r[1], 16)}, ${parseInt(r[2], 16)}, ${parseInt(r[3], 16)}` : null; };
+    safeTheme.primaryRgb = safeTheme.primaryRgb || hexToRgb(safeTheme.primary) || defaultTheme.primaryRgb;
+    safeTheme.secondaryRgb = safeTheme.secondaryRgb || hexToRgb(safeTheme.secondary) || defaultTheme.secondaryRgb;
+    safeTheme.accentRgb = safeTheme.accentRgb || hexToRgb(safeTheme.accent) || defaultTheme.accentRgb;
 
     root.style.setProperty('--theme-primary', safeTheme.primary);
     root.style.setProperty('--theme-secondary', safeTheme.secondary);
@@ -174,7 +164,7 @@ export function applyTheme(theme) {
 }
 
 // --- Header Update ---
-export function updateHeaderUI() {
+function updateHeaderUI() {
     if (!elements.headerTitle || !elements.backButton || !elements.headerAuthSection) { return; }
     const { isAuthenticated, firebaseUser, currentRestaurant, currentRoute, userProfile } = getState();
     const path = currentRoute?.path || '';
@@ -185,25 +175,18 @@ export function updateHeaderUI() {
     elements.headerTitle.textContent = title;
     const showBack = path !== '/dashboard' && path !== '/auth' && !path.match(/^\/[^/]+\/?$/);
     elements.backButton.classList.toggle('hidden', !showBack);
-    const loginLink = elements.headerLoginLink;
-    const userSection = elements.headerUserSection;
-    const userNameDisplay = elements.headerUserName;
-    const logoutButton = elements.headerLogoutButton;
-    const dashboardLink = elements.dashboardLink;
-    const placeholderRight = elements.headerPlaceholderRight;
+    const loginLink = elements.headerLoginLink; const userSection = elements.headerUserSection;
+    const userNameDisplay = elements.headerUserName; const logoutButton = elements.headerLogoutButton;
+    const dashboardLink = elements.dashboardLink; const placeholderRight = elements.headerPlaceholderRight;
 
     if (isAuthenticated && firebaseUser) {
-        loginLink?.classList.add('hidden');
-        userSection?.classList.remove('hidden');
-        dashboardLink?.classList.remove('hidden');
-        placeholderRight?.classList.add('hidden');
+        loginLink?.classList.add('hidden'); userSection?.classList.remove('hidden');
+        dashboardLink?.classList.remove('hidden'); placeholderRight?.classList.add('hidden');
         if (userNameDisplay) userNameDisplay.textContent = userProfile?.name || firebaseUser.displayName || firebaseUser.email || 'User';
         if (logoutButton) logoutButton.onclick = signOutUser;
     } else {
-        loginLink?.classList.remove('hidden');
-        userSection?.classList.add('hidden');
-        dashboardLink?.classList.add('hidden');
-        placeholderRight?.classList.remove('hidden');
+        loginLink?.classList.remove('hidden'); userSection?.classList.add('hidden');
+        dashboardLink?.classList.add('hidden'); placeholderRight?.classList.remove('hidden');
         if (loginLink) loginLink.href = '#/auth';
     }
 }
@@ -211,9 +194,7 @@ export function updateHeaderUI() {
 // --- Loading State ---
 export function showLoading(show) {
     console.log(`UI: Setting generic loading state (page shown by router): ${show}`);
-    // Optional: control a global overlay spinner if needed, distinct from page-loading
-    // const globalSpinner = document.getElementById('global-spinner-overlay');
-    // globalSpinner?.classList.toggle('visible', show);
+    // Can control a global spinner here if needed
 }
 
 // --- Message Display ---
@@ -263,112 +244,229 @@ export function hideModal(modalId) {
 
 export function renderLandingPage(config) {
     if (!config || !elements.landingRestaurantName || !elements.landingRestaurantDescription || !elements.landingSpinButton) return;
-    // Apply theme first for dark/light adaptation
-    applyTheme(config.theme); // Assuming theme might be in config now
+    applyTheme(config?.theme); // Use restaurant theme if available
     elements.landingRestaurantName.textContent = config.name;
-    elements.landingRestaurantDescription.textContent = config.description || 'Get ready for exciting rewards!';
-    // Handle Logo
+    elements.landingRestaurantDescription.textContent = config.description || 'Spin for exclusive rewards!';
     if (elements.landingRestaurantLogo) {
-        if (config.logoUrl) {
-            elements.landingRestaurantLogo.src = config.logoUrl;
-            elements.landingRestaurantLogo.alt = `${config.name} Logo`;
-            elements.landingRestaurantLogo.classList.remove('hidden');
-        } else {
-            // Use a default or hide if no logo
-             elements.landingRestaurantLogo.src = '/assets/icons/gift-box.png'; // Default gift
-             elements.landingRestaurantLogo.alt = 'Spin and Win';
-             elements.landingRestaurantLogo.classList.remove('hidden');
-           // elements.landingRestaurantLogo.classList.add('hidden');
-        }
+        if (config.logoUrl) { elements.landingRestaurantLogo.src = config.logoUrl; elements.landingRestaurantLogo.alt = `${config.name} Logo`; elements.landingRestaurantLogo.classList.remove('hidden'); }
+        else { elements.landingRestaurantLogo.src = '/assets/icons/gift-box.png'; elements.landingRestaurantLogo.alt = 'Spin and Win'; elements.landingRestaurantLogo.classList.remove('hidden'); }
     }
     elements.landingSpinButton.onclick = () => window.location.hash = `#/${config.id}/spin`;
 }
 
 // Helper to get an emoji icon based on offer label/value
-export function getOfferIcon(offer) {
+function getOfferIcon(offer) {
     if (!offer || !offer.label) return '🎁';
     const labelLower = offer.label.toLowerCase();
     const valueLower = offer.value ? offer.value.toLowerCase() : '';
-    if (labelLower.includes('coffee') || valueLower.includes('coffee')) return '☕';
-    if (labelLower.includes('drink') || valueLower.includes('drink') || valueLower.includes('smoothie')) return '🥤';
-    if (labelLower.includes('pizza') || valueLower.includes('pizza')) return '🍕';
+    if (labelLower.includes('coffee')) return '☕';
+    if (labelLower.includes('drink') || labelLower.includes('smoothie')) return '🥤';
+    if (labelLower.includes('pizza')) return '🍕';
     if (labelLower.includes('% off') || valueLower.includes('_percent_off') || labelLower.includes('discount')) return '🏷️';
-    if (labelLower.includes('dollar off') || valueLower.includes('_dollar_off') || labelLower.includes('voucher') || labelLower.includes('₹')) return '💰';
-    if (labelLower.includes('food') || valueLower.includes('food') || valueLower.includes('meal')) return '🍔';
-    if (labelLower.includes('appetizer') || valueLower.includes('appetizer') || labelLower.includes('knots') || labelLower.includes('soup') || labelLower.includes('salad')) return '🥗';
-    if (labelLower.includes('topping') || valueLower.includes('topping')) return '🍓';
-    if (labelLower.includes('bonus') || valueLower.includes('bonus')) return '⭐';
+    if (labelLower.includes('$ off') || valueLower.includes('_dollar_off') || labelLower.includes('voucher') || labelLower.includes('₹')) return '💰';
+    if (labelLower.includes('food') || labelLower.includes('meal')) return '🍔';
+    if (labelLower.includes('appetizer') || labelLower.includes('knots') || labelLower.includes('soup') || labelLower.includes('salad')) return '🥗';
+    if (labelLower.includes('topping')) return '🍓';
+    if (labelLower.includes('dessert')) return '🍰';
+    if (labelLower.includes('bonus')) return '⭐';
     if (labelLower.includes('try again') || valueLower.includes('try_again')) return '🔄';
     return '🎁';
 }
 
-// Render Spin Page UI (including Offers)
+// Creates HTML for a rewards preview tag
+function createRewardTagHTML(offer, index) {
+    const tag = document.createElement('div');
+    tag.className = `reward-tag reward-tag-${(index % 6) + 1}`;
+    tag.textContent = offer.label;
+    return tag;
+}
+
+// Creates HTML for a single item inside a slot reel
+function createSlotItemHTML(offer) {
+    const item = document.createElement('div');
+    item.className = 'slot-item';
+    const icon = getOfferIcon(offer);
+    item.dataset.value = offer.value;
+    item.innerHTML = `<span class="icon">${icon}</span><span>${offer.label}</span>`;
+    return item;
+}
+
+// Populate single reel helper function
+function populateReel(reelElement, offers) {
+    const reelContainer = reelElement.querySelector('.slot-reel-container') || reelElement;
+    if (!reelContainer || !offers || offers.length === 0) {
+        console.warn("UI: Cannot populate reel, container or offers missing/empty.");
+        reelContainer.innerHTML = '<div class="slot-item"><span class="icon">❓</span><span>No Prizes</span></div>';
+        return;
+    };
+    reelContainer.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    const requiredItems = Math.max(15, offers.length * 5); // Ensure enough items
+    for (let i = 0; i < requiredItems; i++) {
+        const offer = offers[i % offers.length]; // Cycle through offers
+        fragment.appendChild(createSlotItemHTML(offer));
+    }
+    reelContainer.appendChild(fragment);
+    reelContainer.style.transition = 'none';
+    const reelHeight = reelElement.clientHeight || 100; // Use default if height not available
+    const itemHeight = reelContainer.querySelector('.slot-item')?.clientHeight || REEL_ITEM_HEIGHT;
+    const initialOffset = (reelHeight / 2) - (itemHeight / 2);
+    reelContainer.style.transform = `translateY(${initialOffset}px)`;
+    reelContainer.offsetHeight;
+    reelContainer.style.transition = '';
+}
+
+// Render Spin Page UI (including Offers Preview and Initial Slot State)
 export function renderSpinPageUI() {
     const { currentRestaurant } = getState();
     if (!currentRestaurant || !elements.spinPageRemainingSpins || !elements.spinButtonElement) {
         console.warn("UI: Cannot render spin page UI - missing elements or restaurant context.");
-        elements.spinOffersSection?.classList.add('hidden');
+        elements.spinRewardsPreview?.classList.add('hidden');
         return;
     }
-    // Render remaining spins display
+    applyTheme(currentRestaurant.theme); // Apply theme
+
+    // Render remaining spins
     const remainingSpins = getRemainingSpins(currentRestaurant.id);
     if (elements.spinPageRemainingSpins) {
         elements.spinPageRemainingSpins.textContent = `Spins left: ${remainingSpins}`;
         elements.spinPageRemainingSpins.classList.remove('hidden');
-    }
-    // Render Offers Section
-    const offersContainer = elements.spinOffersContainer;
-    const offersSection = elements.spinOffersSection;
-    // Ensure config.offers from restaurant data is used if currentRestaurant.spinOffers isn't the source
-    const offers = currentRestaurant.spinOffers || currentRestaurant.offers || [];
+    } else { console.warn("UI: spinPageRemainingSpins element not found."); }
 
-    if (offersContainer && offersSection) {
-        offersContainer.innerHTML = '';
-        if (offers.length > 0) {
-            // Filter out internal values if needed, or just display labels
-            const displayOffers = offers.filter(offer => typeof offer === 'string' || (offer.value !== 'TRY_AGAIN'));
+    // Render Rewards Preview Tags
+    const rewardsPreviewContainer = elements.spinRewardsPreviewContainer;
+    const rewardsPreviewSection = elements.spinRewardsPreview;
+    const allOffersRaw = currentRestaurant.spinOffers || currentRestaurant.offers || [];
+    const allOffers = allOffersRaw.map(o => typeof o === 'string' ? { label: o, value: o } : o).filter(o => typeof o === 'object' && o !== null);
+    const displayableOffers = allOffers.filter(offer => offer.value !== 'TRY_AGAIN');
 
-            if (displayOffers.length > 0) {
-                displayOffers.forEach(offerInput => {
-                    const card = document.createElement('div');
-                    card.className = 'offer-card';
-                    // Handle both string offers and object offers
-                    const isStringOffer = typeof offerInput === 'string';
-                    const offer = isStringOffer ? { label: offerInput, value: offerInput } : offerInput;
-                    const icon = getOfferIcon(offer);
-                    card.innerHTML = `
-                        <span class="offer-icon">${icon}</span>
-                        <span class="offer-label">${offer.label}</span>
-                    `;
-                    offersContainer.appendChild(card);
-                });
-                offersSection.classList.remove('hidden');
-            } else {
-                offersSection.classList.add('hidden');
-            }
+    if (rewardsPreviewContainer && rewardsPreviewSection) {
+        rewardsPreviewContainer.innerHTML = '';
+        if (displayableOffers.length > 0) {
+            displayableOffers.slice(0, 6).forEach((offer, index) => rewardsPreviewContainer.appendChild(createRewardTagHTML(offer, index)));
+            rewardsPreviewSection.classList.remove('hidden');
+        } else { rewardsPreviewSection.classList.add('hidden'); }
+    } else { console.warn("UI: Spin rewards preview container or section not found."); }
+
+    // Populate Initial Slot Reel State
+    const reelElement = elements.slotReel1;
+    if (reelElement) {
+        if (displayableOffers.length > 0) {
+            populateReel(reelElement, displayableOffers);
         } else {
-            offersSection.classList.add('hidden');
+             const reelContainer = reelElement.querySelector('.slot-reel-container') || reelElement;
+             reelContainer.innerHTML = '<div class="slot-item"><span class="icon">🚫</span><span>No Prizes Available</span></div>';
         }
-    } else { console.warn("UI: Spin page offers container not found."); }
+    } else { console.error("UI: Slot reel element 'reel1' not found!"); }
 
     // Update Spin Button State
-    const spinButton = elements.spinButtonElement; // Now the external button
+    const spinButton = elements.spinButtonElement;
     if (spinButton) {
         const textSpan = spinButton.querySelector('span');
+        const isSpinning = spinButton.classList.contains('spinning'); // Check class state
         if (remainingSpins <= 0) {
-            if(textSpan) textSpan.textContent = 'No Spins Left';
+            if (textSpan) textSpan.textContent = 'No Spins Left';
             spinButton.setAttribute('disabled', 'true');
+            spinButton.classList.add('disabled');
         } else {
-            if (spinButton.hasAttribute('disabled')) spinButton.removeAttribute('disabled');
-            // Only reset text if not currently spinning
-            if (textSpan && !getState().isLoading) { // Check general loading instead? Or add spinning state?
-                 textSpan.textContent = 'Spin Now';
-            }
+            spinButton.removeAttribute('disabled');
+            spinButton.classList.remove('disabled');
+            if (textSpan && !isSpinning) { textSpan.textContent = 'Spin Now'; }
         }
-    }
+    } else { console.error("UI: Spin action button element not found!"); }
 }
 
 
+// --- Slot Animation Control ---
+const REEL_ITEM_HEIGHT = 100; // *** MUST MATCH CSS height for .slot-item ***
+const SPIN_INTERVAL = 40; // Interval speed (ms) for blur effect
+const SPIN_BLUR_SPEED = 100; // Pixels per interval scroll
+let reelIntervals = [null]; // Only one interval needed
+
+// Starts the spinning animation for the single reel
+export function startSlotAnimation() {
+    // Get valid displayable offers for animation
+    const allOffersRaw = getState().currentRestaurant?.spinOffers || getState().currentRestaurant?.offers || [];
+    const offers = allOffersRaw.map(o => typeof o === 'string' ? { label: o, value: o } : o)
+                               .filter(o => typeof o === 'object' && o !== null && o.value !== 'TRY_AGAIN');
+
+    if (offers.length === 0) { console.warn("UI: No valid offers to animate reel."); return; }
+
+    const reelElement = elements.slotReel1;
+    const reelContainer = reelElement?.querySelector('.slot-reel-container') || reelElement;
+    if (!reelContainer) { console.error("UI: Cannot start slot animation - reel container not found."); return; }
+
+    // Ensure sufficient items for looping illusion
+    if (reelContainer.children.length < offers.length * 5) { // Need enough items
+         console.log("UI: Repopulating reel for animation.");
+         populateReel(reelContainer, offers); // Use only displayable offers
+    }
+
+    reelContainer.classList.add('spinning');
+    reelContainer.style.transition = `transform ${SPIN_INTERVAL / 1000}s linear`; // Fast transition for blur
+
+    let position = parseFloat(reelContainer.style.transform?.replace(/[^0-9.-]/g, '') || '0');
+    const totalHeight = reelContainer.scrollHeight;
+    const visibleHeight = reelElement.clientHeight || REEL_ITEM_HEIGHT; // Use default if needed
+
+    if (reelIntervals[0]) clearInterval(reelIntervals[0]); // Clear previous interval
+
+    console.log("UI: Starting slot animation interval.");
+    reelIntervals[0] = setInterval(() => {
+        position -= SPIN_BLUR_SPEED; // Move upwards fast
+        // Wrap around logic
+        if (Math.abs(position) >= (totalHeight - visibleHeight)) {
+            const offset = (visibleHeight / 2) - (REEL_ITEM_HEIGHT / 2); // Center offset
+            const overScroll = Math.abs(position) % totalHeight; // How much scrolled past the full list
+            position = offset - overScroll; // Reset near top based on overshoot
+
+            reelContainer.style.transition = 'none'; // No transition during reset jump
+            reelContainer.style.transform = `translateY(${position}px)`;
+            reelContainer.offsetHeight; // Force reflow
+            reelContainer.style.transition = `transform ${SPIN_INTERVAL / 1000}s linear`; // Re-enable
+        } else {
+            reelContainer.style.transform = `translateY(${position}px)`;
+        }
+    }, SPIN_INTERVAL);
+}
+
+// Stops the spinning animation and smoothly lands on the result
+export function stopSlotAnimation(resultOffer) {
+    console.log("UI: Stopping slot animation to land on:", resultOffer?.label);
+    const reelElement = elements.slotReel1;
+    const reelContainer = reelElement?.querySelector('.slot-reel-container') || reelElement;
+    if (!reelContainer) { console.error("UI: Cannot stop animation, reel container not found."); return; }
+
+    // Clear the spinning interval
+    if (reelIntervals[0]) { clearInterval(reelIntervals[0]); reelIntervals[0] = null; }
+
+    // Find target index for the result visually
+    let targetIndex = -1;
+    const items = reelContainer.querySelectorAll('.slot-item');
+    const offersInReel = Array.from(items).map(item => item.querySelector('span:last-child')?.textContent || '');
+
+    // Try find instance in middle third first for smoother visual stop
+    const searchStart = Math.floor(items.length / 3);
+    const searchEnd = Math.floor(items.length * 2 / 3);
+    for (let i = searchStart; i <= searchEnd; i++) { if (items[i]?.textContent.includes(resultOffer.label)) { targetIndex = i; break; } }
+    // Fallback: search from beginning
+    if (targetIndex === -1) { for (let i = 0; i < items.length; i++) { if (items[i]?.textContent.includes(resultOffer.label)) { targetIndex = i; break; } } }
+    // Absolute fallback
+    if (targetIndex === -1) { targetIndex = Math.floor(items.length / 2); console.warn(`UI: Could not find "${resultOffer.label}" in reel visually, stopping near middle.`); }
+
+    // Calculate final position to center the target item
+    const windowHeight = reelElement.clientHeight || 100;
+    const finalPosition = (windowHeight / 2) - (REEL_ITEM_HEIGHT / 2) - (targetIndex * REEL_ITEM_HEIGHT);
+
+    // Apply smooth 'ease-out' style transition to the final position
+    reelContainer.style.transition = 'transform 1.5s cubic-bezier(0.23, 1, 0.32, 1)'; // Slow down smoothly
+    reelContainer.style.transform = `translateY(${finalPosition}px)`;
+    reelContainer.classList.remove('spinning');
+    console.log(`UI: Animating reel stop to position: ${finalPosition}px (index: ${targetIndex})`);
+}
+
+
+// --- Auth Page Rendering ---
 export function renderAuthPage(claimInfo = null) {
      if (!elements.authLoginForm || !elements.authSignupForm || !elements.authLoginMessage || !elements.authSignupMessage || !elements.authClaimInfo || !elements.authClaimDescription) {
           console.error("UI: Auth page elements missing."); return;
@@ -383,7 +481,6 @@ export function renderAuthPage(claimInfo = null) {
          elements.authClaimInfo.classList.add('hidden');
      }
 }
-
 export function showAuthTab(tabName) {
      const loginTab = elements.authLoginTab; const signupTab = elements.authSignupTab;
      const loginForm = elements.authLoginForm; const signupForm = elements.authSignupForm;
@@ -393,6 +490,7 @@ export function showAuthTab(tabName) {
      loginForm.classList.toggle('hidden', !isLogin); signupForm.classList.toggle('hidden', isLogin);
 }
 
+// --- Coupon Page Rendering ---
 export function renderCouponDisplayPage(claimApiResponse, restaurantId) {
      if (!elements.couponDescription || !elements.couponCode || !elements.couponValidity || !elements.couponBonusMessage || !elements.couponViewRewardsButton || !elements.couponSpinAgainButton) {
           console.error("UI: Coupon display page elements missing."); return;
@@ -406,10 +504,9 @@ export function renderCouponDisplayPage(claimApiResponse, restaurantId) {
      elements.couponDescription.textContent = claimApiResponse.message || "Reward Claimed!";
      elements.couponCode.textContent = claimApiResponse.coupon_code;
      elements.couponValidity.textContent = `Expires: ${formatDate(claimApiResponse.expiry_date)}. Show code to redeem.`;
-     let bonusMsg = null; // Logic to determine bonus message based on achieved_rewards
-     if (claimApiResponse.achieved_rewards && claimApiResponse.achieved_rewards.length > 0) {
-          const lastBonus = claimApiResponse.achieved_rewards[claimApiResponse.achieved_rewards.length - 1];
-          bonusMsg = `🎉 Bonus: You also achieved "${lastBonus.reward}" (${lastBonus.type})!`;
+     let bonusMsg = null;
+     if (claimApiResponse.achieved_rewards?.length > 0) { // Basic check if bonuses were achieved
+          bonusMsg = `🎉 Bonus Unlocked! Check your dashboard for details.`; // Generic bonus message
      }
      if(bonusMsg) { elements.couponBonusMessage.textContent = bonusMsg; elements.couponBonusMessage.classList.remove('hidden'); }
      else { elements.couponBonusMessage.classList.add('hidden'); }
@@ -419,9 +516,7 @@ export function renderCouponDisplayPage(claimApiResponse, restaurantId) {
 
 
 // --- Dashboard Rendering Helpers ---
-
-// Tab Click Handler
-export function handleTabClick(event) {
+function handleTabClick(event) {
     const clickedTab = event.target;
     const targetId = clickedTab.getAttribute('data-tab-target');
     if (!targetId || !elements.dashboardTabsContainer || !elements.dashboardTabContentContainer) {
@@ -434,121 +529,61 @@ export function handleTabClick(event) {
     if (targetPane) targetPane.classList.add('active');
     else console.warn(`UI: Target tab content pane not found: ${targetId}`);
 }
-
-// Creates HTML for a Claim History item
-export function createClaimHistoryItemHTML(claim) {
+function createClaimHistoryItemHTML(claim) {
     const item = document.createElement('div');
     item.className = 'history-item';
-    const offer = claim?.offer ?? 'N/A';
-    const code = claim?.coupon_code ?? 'N/A';
-    const date = formatDate(claim?.claimed_at);
-    const status = claim?.status ?? 'unknown';
-    item.innerHTML = `
-        <div class="history-offer-code">
-            <span class="history-offer">${offer}</span>
-            <span class="history-code">${code}</span>
-        </div>
-        <div class="history-status-date">
-            <span class="history-status status-${status}">${status}</span>
-            <span class="history-date">${date || ''}</span>
-        </div>`;
+    const offer = claim?.offer ?? 'N/A'; const code = claim?.coupon_code ?? 'N/A';
+    const date = formatDate(claim?.claimed_at); const status = claim?.status ?? 'unknown';
+    item.innerHTML = `<div class="history-offer-code"><span class="history-offer">${offer}</span><span class="history-code">${code}</span></div><div class="history-status-date"><span class="history-status status-${status}">${status}</span><span class="history-date">${date || ''}</span></div>`;
     return item;
 }
-
-// Creates HTML for an Unlocked or Upcoming Reward goal item
-export function createRewardGoalItemHTML(rewardName, points, type = 'unlocked') {
+function createRewardGoalItemHTML(rewardName, points, type = 'unlocked') {
     const item = document.createElement('li');
     const icon = type === 'unlocked' ? '✓' : '⏳';
     const iconClass = type === 'unlocked' ? 'icon-success' : 'icon-upcoming';
-    item.innerHTML = `
-        <span class="icon ${iconClass}">${icon}</span>
-        <span class="reward-name">${rewardName ?? 'Unknown Reward'}</span>
-        <span class="reward-points">(${points} pts)</span>`;
+    item.innerHTML = `<span class="icon ${iconClass}">${icon}</span><span class="reward-name">${rewardName ?? 'Unknown Reward'}</span><span class="reward-points">(${points} pts)</span>`;
     return item;
 }
-
-// Toggles visibility of reward history list
-export function toggleRewardHistory(event) {
-    const button = event.target;
-    const targetId = button.getAttribute('data-target');
-    const historyList = document.getElementById(targetId);
-    if (!historyList) return;
+function toggleRewardHistory(event) {
+    const button = event.target; const targetId = button.getAttribute('data-target');
+    const historyList = document.getElementById(targetId); if (!historyList) return;
     const isVisible = !historyList.classList.contains('hidden');
     if (isVisible) {
         historyList.style.maxHeight = historyList.scrollHeight + "px";
-        requestAnimationFrame(() => {
-            historyList.style.maxHeight = '0px'; historyList.style.opacity = '0'; historyList.style.marginTop = '0';
-            button.textContent = button.textContent.replace('▲', '▼').replace('Hide', 'View'); });
+        requestAnimationFrame(() => { historyList.style.maxHeight = '0px'; historyList.style.opacity = '0'; historyList.style.marginTop = '0'; button.textContent = button.textContent.replace('▲', '▼').replace('Hide', 'View'); });
         historyList.addEventListener('transitionend', () => { historyList.classList.add('hidden'); }, { once: true });
     } else {
-        historyList.classList.remove('hidden');
-        const scrollHeight = historyList.scrollHeight;
+        historyList.classList.remove('hidden'); const scrollHeight = historyList.scrollHeight;
         historyList.style.maxHeight = '0px'; historyList.style.opacity = '0'; historyList.style.marginTop = '0';
-        requestAnimationFrame(() => {
-            historyList.style.maxHeight = scrollHeight + "px"; historyList.style.opacity = '1'; historyList.style.marginTop = '1rem';
-            button.textContent = button.textContent.replace('▼', '▲').replace('View', 'Hide'); });
+        requestAnimationFrame(() => { historyList.style.maxHeight = scrollHeight + "px"; historyList.style.opacity = '1'; historyList.style.marginTop = '1rem'; button.textContent = button.textContent.replace('▼', '▲').replace('View', 'Hide'); });
         historyList.addEventListener('transitionend', () => { if (!historyList.classList.contains('hidden')) historyList.style.maxHeight = ''; }, { once: true });
     }
 }
 
-// --- Render Global Spin Points Timeline ---
-export function renderGlobalTimeline(currentUserPoints) {
-    const timelineSection = elements.dashboardGlobalTimeline;
-    const timelineContainer = timelineSection?.querySelector('.timeline-container');
-    if (!timelineContainer) { console.warn("UI: Global timeline container not found."); timelineSection?.classList.add('hidden'); return; }
-
-    timelineContainer.innerHTML = ''; // Clear previous
-    const milestones = GLOBAL_SPIN_MILESTONES.sort((a, b) => a.points - b.points);
-    if (milestones.length === 0) { timelineSection?.classList.add('hidden'); return; }
-    const lastMilestonePoints = milestones[milestones.length - 1].points;
-    const maxPoints = Math.max(lastMilestonePoints, currentUserPoints || 0) * 1.15;
-    if (maxPoints <= 0) { timelineContainer.innerHTML = '<p class="info-message">Spin to start your journey!</p>'; timelineSection.classList.remove('hidden'); return; }
-
-    const progressPercent = Math.min(100, Math.max(0, (currentUserPoints / maxPoints) * 100));
-    const progressBar = document.createElement('div'); progressBar.className = 'timeline-progress'; progressBar.style.width = `${progressPercent}%`; timelineContainer.appendChild(progressBar);
-    const userMarker = document.createElement('div'); userMarker.className = 'user-position-marker'; userMarker.style.left = `${progressPercent}%`; timelineContainer.appendChild(userMarker);
-    const milestonesWrapper = document.createElement('div'); milestonesWrapper.className = 'timeline-milestones';
-    let nextMilestoneFound = false;
-    milestones.forEach(milestone => {
-        const milestoneEl = document.createElement('div'); milestoneEl.className = 'milestone';
-        const isAchieved = currentUserPoints >= milestone.points; let isNext = false;
-        if (!isAchieved && !nextMilestoneFound) { isNext = true; nextMilestoneFound = true; }
-        milestoneEl.classList.toggle('achieved', isAchieved); milestoneEl.classList.toggle('next', isNext);
-        milestoneEl.innerHTML = `<div class="milestone-marker"></div><div class="milestone-points">${milestone.points} pts</div><div class="milestone-reward">${milestone.icon ? `<span class="milestone-icon">${milestone.icon}</span>` : ''}${milestone.reward}</div>`;
-        milestonesWrapper.appendChild(milestoneEl);
-    });
-    timelineContainer.appendChild(milestonesWrapper);
-    timelineSection.classList.remove('hidden');
-}
-
-
-// *** Render Dashboard (Main Function - Using Corrected API Structure) ***
+// --- Render Dashboard (Main Function - Uses Corrected API Structure) ---
 export function renderDashboard(dashboardApiResponse) {
     // --- Basic Element Checks & Get State ---
-    if (!elements.dashboardProfileSection || !elements.dashboardSummary || !elements.dashboardTabsContainer || !elements.dashboardTabContentContainer || !elements.dashboardNoData || !elements.dashboardGlobalTimeline) {
+    if (!elements.dashboardProfileSection || !elements.dashboardSummary || !elements.dashboardTabsContainer || !elements.dashboardTabContentContainer || !elements.dashboardNoData) {
         console.error("UI: Essential dashboard elements missing, cannot render."); showPage('page-not-found'); return;
     }
-    const { isAuthenticated, userProfile } = getState();
-    const currentUser = getCurrentFirebaseUser();
+    const { isAuthenticated, userProfile } = getState(); const currentUser = getCurrentFirebaseUser();
 
     // --- Render Profile Section ---
-    if (isAuthenticated && currentUser && elements.dashboardWelcome && elements.dashboardEmail && elements.dashboardPhone) { /* ... Render profile as before ... */ }
-    else { elements.dashboardProfileSection.classList.add('hidden'); }
+    if (isAuthenticated && currentUser && elements.dashboardWelcome && elements.dashboardEmail && elements.dashboardPhone) {
+        elements.dashboardWelcome.textContent = `Welcome, ${userProfile?.name || currentUser.displayName || currentUser.email || 'User'}!`;
+        elements.dashboardEmail.textContent = currentUser.email || 'N/A';
+        elements.dashboardPhone.textContent = userProfile?.whatsapp || 'Not Provided';
+        elements.dashboardProfileSection.classList.remove('hidden');
+    } else { elements.dashboardProfileSection.classList.add('hidden'); }
 
     // --- Get Containers ---
-    const summaryContainer = elements.dashboardSummary;
-    const globalTimelineSection = elements.dashboardGlobalTimeline;
-    const tabsContainer = elements.dashboardTabsContainer;
-    const contentContainer = elements.dashboardTabContentContainer;
-    const noDataElement = elements.dashboardNoData;
+    const summaryContainer = elements.dashboardSummary; const tabsContainer = elements.dashboardTabsContainer;
+    const contentContainer = elements.dashboardTabContentContainer; const noDataElement = elements.dashboardNoData;
     const restaurantHeader = document.getElementById('dashboard-restaurant-header');
 
     // --- Clear Previous Content / Hide Sections ---
     summaryContainer.innerHTML = ''; tabsContainer.innerHTML = ''; contentContainer.innerHTML = '';
     noDataElement.classList.add('hidden'); summaryContainer.classList.add('hidden');
-    globalTimelineSection?.classList.add('hidden');
-    const timelineContainer = globalTimelineSection?.querySelector('.timeline-container');
-    if(timelineContainer) timelineContainer.innerHTML = '';
     tabsContainer.classList.add('hidden'); contentContainer.classList.add('hidden');
     restaurantHeader?.classList.add('hidden');
 
@@ -559,17 +594,13 @@ export function renderDashboard(dashboardApiResponse) {
         noDataElement.classList.remove('hidden'); contentContainer.classList.remove('hidden'); return;
     }
 
-    const dashboard = dashboardApiResponse.dashboard;
-    const restaurantIds = Object.keys(dashboard);
+    const dashboard = dashboardApiResponse.dashboard; const restaurantIds = Object.keys(dashboard);
 
     // --- Calculate and Render Overall Summary ---
     let calculatedTotalSpinPoints = 0;
     restaurantIds.forEach(id => { const info = dashboard[id]?.restaurant_info; const history = dashboard[id]?.user_data?.claim_history; if (info && history) calculatedTotalSpinPoints += (history.length * (info.spin_points_per_spin ?? 10)); });
-    summaryContainer.innerHTML = `<span>Total Spin Points (Est.): <strong>${calculatedTotalSpinPoints}</strong></span>`; // Removed Tier/Punches for now
+    summaryContainer.innerHTML = `<span>Total Spin Points (Est.): <strong>${calculatedTotalSpinPoints}</strong></span>`;
     summaryContainer.classList.remove('hidden');
-
-    // --- Render Global Timeline ---
-    renderGlobalTimeline(calculatedTotalSpinPoints);
 
     // --- Prepare and Render Restaurant Tabs ---
     if (restaurantIds.length === 0) {
@@ -578,17 +609,13 @@ export function renderDashboard(dashboardApiResponse) {
     } else {
         restaurantHeader?.classList.remove('hidden'); tabsContainer.classList.remove('hidden');
         contentContainer.classList.remove('hidden'); noDataElement.classList.add('hidden');
-
         const tabData = restaurantIds.map(id => ({id, name: dashboard[id]?.restaurant_info?.restaurant_name || `Rest...${id.slice(-4)}`, data: dashboard[id]})).sort((a, b) => a.name.localeCompare(b.name));
 
         // --- Create Tabs and Content Panes ---
         tabData.forEach(({ id, name, data }, index) => {
-            const restaurant_info = data?.restaurant_info || {};
-            const user_data = data?.user_data || {};
-            const claim_history = user_data?.claim_history || [];
-            const loyalty_settings = restaurant_info?.loyalty_settings?.current?.reward_thresholds || {};
-            const spin_thresholds_obj = loyalty_settings.spin_points || {};
-            const spin_points_per_spin = restaurant_info?.spin_points_per_spin ?? 10;
+            const restaurant_info = data?.restaurant_info || {}; const user_data = data?.user_data || {};
+            const claim_history = user_data?.claim_history || []; const loyalty_settings = restaurant_info?.loyalty_settings?.current?.reward_thresholds || {};
+            const spin_thresholds_obj = loyalty_settings.spin_points || {}; const spin_points_per_spin = restaurant_info?.spin_points_per_spin ?? 10;
             const current_spin_points = claim_history.length * spin_points_per_spin;
 
             // Create Tab Button
@@ -600,15 +627,11 @@ export function renderDashboard(dashboardApiResponse) {
             const contentPane = document.createElement('div'); contentPane.className = 'dashboard-tab-content'; contentPane.id = tabContentId;
             if (index === 0) contentPane.classList.add('active');
 
-            // --- Populate Content Pane ---
-            // Card for all content for this restaurant
+            // --- Populate Content Pane with Card ---
             const detailsCard = document.createElement('div'); detailsCard.className = 'restaurant-details-card';
-
             // 1. Spin Points Summary
             const pointsSection = document.createElement('div'); pointsSection.className = 'tab-section-card spin-points-summary';
-            pointsSection.innerHTML = `<h4>Spin Points</h4><p>Earned Here: <strong>${current_spin_points}</strong></p>`;
-            detailsCard.appendChild(pointsSection);
-
+            pointsSection.innerHTML = `<h4>Spin Points</h4><p>Earned Here: <strong>${current_spin_points}</strong></p>`; detailsCard.appendChild(pointsSection);
             // 2. Reward Thresholds
             const thresholdsSection = document.createElement('div'); thresholdsSection.className = 'tab-section-card spin-rewards-section';
             thresholdsSection.innerHTML = `<h4>Spin Rewards Progress</h4>`;
@@ -621,7 +644,6 @@ export function renderDashboard(dashboardApiResponse) {
             if (upcomingCount > 0) { thresholdsSection.innerHTML += '<h5 class="mt-1">Upcoming:</h5>'; thresholdsSection.appendChild(upcomingList); }
             if (unlockedCount === 0 && upcomingCount === 0) { thresholdsSection.innerHTML += '<p class="info-message">No spin rewards defined.</p>'; }
             detailsCard.appendChild(thresholdsSection);
-
             // 3. Claim History
             if (claim_history.length > 0) {
                 const historyContainer = document.createElement('div'); historyContainer.className = 'tab-section-card claim-history-section';
@@ -632,13 +654,11 @@ export function renderDashboard(dashboardApiResponse) {
                 historyContainer.addEventListener('click', (e) => { if (e.target.classList.contains('toggle-history-btn')) { toggleRewardHistory(e); e.target.textContent = historyList.classList.contains('hidden') ? `View (${claim_history.length}) ▼` : `Hide ▲`; } });
                 detailsCard.appendChild(historyContainer);
             }
-
             // 4. Spin Again Button
             const spinAgainContainer = document.createElement('div'); spinAgainContainer.className = 'spin-again-section';
             const spinAgainBtn = document.createElement('button'); spinAgainBtn.className = 'button button-primary button-fullWidth dashboard-spin-again-button'; spinAgainBtn.textContent = `Spin Again at ${name}`;
             spinAgainBtn.onclick = () => { window.location.hash = `#/${id}/spin`; };
             spinAgainContainer.appendChild(spinAgainBtn); detailsCard.appendChild(spinAgainContainer);
-
             // Add Card to Pane
             contentPane.appendChild(detailsCard);
             contentContainer.appendChild(contentPane);
@@ -649,34 +669,39 @@ export function renderDashboard(dashboardApiResponse) {
 
 // --- Global UI Update Trigger ---
 document.addEventListener('statechange', (event) => {
-    const changedState = event.detail;
-    const dashboardPageActive = document.getElementById('page-dashboard')?.classList.contains('active');
+     const changedState = event.detail;
+     const spinPageActive = document.getElementById('page-spin')?.classList.contains('active');
+     const dashboardPageActive = document.getElementById('page-dashboard')?.classList.contains('active');
 
-    // Update header if relevant state changes
-    if (changedState.hasOwnProperty('isAuthenticated') || changedState.hasOwnProperty('currentRestaurant') || changedState.hasOwnProperty('firebaseUser') || changedState.hasOwnProperty('userProfile') ) {
-        updateHeaderUI();
-    }
-    // Update spin page UI if relevant state changes AND page is active
-    if (document.getElementById('page-spin')?.classList.contains('active') &&
-       (changedState.hasOwnProperty('dailySpinsUpdated') || changedState.hasOwnProperty('currentRestaurant'))) {
-        renderSpinPageUI();
-    }
-
-    // Update dashboard profile section only if profile changed AND page is active
-    if (dashboardPageActive && changedState.hasOwnProperty('userProfile')) {
-        const currentUser = getCurrentFirebaseUser();
-        const currentProfile = changedState.userProfile;
-         if (currentUser && elements.dashboardProfileSection && elements.dashboardWelcome && elements.dashboardEmail && elements.dashboardPhone) {
-            elements.dashboardWelcome.textContent = `Welcome, ${currentProfile?.name || currentUser.displayName || currentUser.email}!`;
-            elements.dashboardEmail.textContent = currentUser.email || 'N/A';
-            elements.dashboardPhone.textContent = currentProfile?.whatsapp || 'Not Provided';
-         }
-    }
-
-     // Re-render the *entire* dashboard content if new dashboard data arrives
-     // Avoid re-render just for profile change if handled above
-     if (dashboardPageActive && changedState.hasOwnProperty('dashboardData') && !changedState.hasOwnProperty('userProfile')) {
-          console.log("UI: Re-rendering dashboard content due to new dashboardData state.");
-          renderDashboard(changedState.dashboardData);
+     // Update header
+     if (changedState.hasOwnProperty('isAuthenticated') || changedState.hasOwnProperty('currentRestaurant') || changedState.hasOwnProperty('firebaseUser') || changedState.hasOwnProperty('userProfile') ) {
+         updateHeaderUI();
      }
+     // Update spin page UI
+     if (spinPageActive && (changedState.hasOwnProperty('dailySpinsUpdated') || changedState.hasOwnProperty('currentRestaurant'))) {
+         renderSpinPageUI();
+     }
+
+     // Update dashboard profile section
+     if (dashboardPageActive && changedState.hasOwnProperty('userProfile')) {
+         const currentUser = getCurrentFirebaseUser(); const currentProfile = changedState.userProfile;
+          if (currentUser && elements.dashboardProfileSection && elements.dashboardWelcome && elements.dashboardEmail && elements.dashboardPhone) {
+             elements.dashboardWelcome.textContent = `Welcome, ${currentProfile?.name || currentUser.displayName || currentUser.email}!`;
+             elements.dashboardEmail.textContent = currentUser.email || 'N/A';
+             elements.dashboardPhone.textContent = currentProfile?.whatsapp || 'Not Provided';
+          }
+     }
+
+      // Re-render the *entire* dashboard content if new dashboard data arrives
+      if (dashboardPageActive && changedState.hasOwnProperty('dashboardData') && !changedState.hasOwnProperty('userProfile')) {
+           console.log("UI State Listener: Re-rendering dashboard content due to new dashboardData state.");
+           renderDashboard(changedState.dashboardData);
+      }
+
+      // Handle dashboard loading state display
+      if (dashboardPageActive && changedState.hasOwnProperty('dashboardLoading')) {
+          const dashboardLoader = document.getElementById('dashboard-content-loader'); // Example loader ID
+          if(dashboardLoader) dashboardLoader.classList.toggle('hidden', !changedState.dashboardLoading);
+          elements.dashboardTabsContainer?.classList.toggle('loading', changedState.dashboardLoading); // Example: Dim tabs
+      }
 });
